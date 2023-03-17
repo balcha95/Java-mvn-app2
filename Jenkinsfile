@@ -1,22 +1,21 @@
 pipeline {
-    agent { label 'awsdevops' }
+    agent { label 'slavenode1' }
 	
 
     tools {
         // Install the Maven version configured as "M3" and add it to the path.
-	jdk "aws_open_jdk"
-        maven "slave_maven"
+        maven "maven"
     }
 
 	environment {	
-		DOCKERHUB_CREDENTIALS=credentials('dockerloginid')
+		DOCKERHUB_CREDENTIALS=credentials('new_docker_id')
 	} 
     
-    stages {
+     stages {
         stage('SCM Checkout') {
             steps {
                 // Get some code from a GitHub repository
-                git 'https://github.com/LoksaiETA/Java-mvn-app2.git'
+                git 'https://github.com/balcha95/Java-mvn-app2.git'
             }
 		}
         stage('Maven Build') {
@@ -24,53 +23,32 @@ pipeline {
                 // Run Maven on a Unix agent.
                 sh "mvn -Dmaven.test.failure.ignore=true clean package"
             }
-		}
+			post {
+                   //If Maven was able to run the tests.even if some of the test
+                  //failed, record the test results and archive the jar file.
+              success{
+                    sh "cp target/mvn-hello-world.war /home/devopsadmin"
+                     }
+                 }
+        }         
         stage("Docker build"){
-            steps {
-				sh 'docker version'
-				sh "docker build -t loksaieta/loksai-eta-app:${BUILD_NUMBER} ."
+	        steps {
+			    sh 'docker version'
+				sh "docker build -t balcha/mvn-eta-app:${BUILD_NUMBER} ."
 				sh 'docker image list'
-				sh "docker tag loksaieta/loksai-eta-app:${BUILD_NUMBER} loksaieta/loksai-eta-app:latest"
-            }
-        }
-		stage('Login2DockerHub') {
-
-			steps {
-				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-			}
-		}
-        stage('Approve - push Image to dockerhub'){
-            steps{
-                
-                //----------------send an approval prompt-------------
-                script {
-                   env.APPROVED_DEPLOY = input message: 'User input required Choose "yes" | "Abort"'
-                       }
-                //-----------------end approval prompt------------
-            }
-        }
-		stage('Push2DockerHub') {
-
-			steps {
-				sh "docker push loksaieta/loksai-eta-app:latest"
-			}
-		}
-        stage('Approve - Deployment to Kubernetes Cluster'){
-            steps{
-                
-                //----------------send an approval prompt-----------
-                script {
-                   env.APPROVED_DEPLOY = input message: 'User input required Choose "yes" | "Abort"'
-                       }
-                //-----------------end approval prompt------------
-            }
-        }
-        stage('Deploy to Kubernetes Cluster') {
+				sh "docker tag balcha/mvn-eta-app:${BUILD_NUMBER} balcha/mvn-eta-app:latest"
+	            }
+	    }
+	    stage('Login2DockerHub') {
             steps {
-		script {
-		sshPublisher(publishers: [sshPublisherDesc(configName: 'kubernetescluster', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'kubectl apply -f k8smvndeployment.yaml', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '.', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '*.yaml')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+			} 
+        }      
+        stage('Push2DockerHub') {
+
+			steps {
+				sh "docker push balcha/mvn-eta-app:latest"
+			}
 		}
-            }
-	}
-}
+    }
 }
