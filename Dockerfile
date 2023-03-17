@@ -1,4 +1,4 @@
 FROM tomcat:latest
 WORKDIR /home/devopsadmin
-COPY ./mvn-hello-world.war /usr/local/tomcat/webapps
-RUN cp -r /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+COPY ./mvn-hello-world.war /home/devopsadmin/tomcat/webapps
+RUN cp -r /home/devopsadmin/tomcat/webapps.dist/* /home/devopsadmin/tomcat/webapps
