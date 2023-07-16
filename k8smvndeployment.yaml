@@ -1,37 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: stackfusion-deploy
-  labels:
-    app: stackfusion-mvn-app
+  name: stackfusion-deployment
 spec:
-  replicas: 3
   selector:
     matchLabels:
-      app: stackfusion-mvn-app
+      app: stackfusion
+  replicas: 1
   template:
     metadata:
       labels:
-        app: stackfusion-mvn-app
+        app: stackfusion
     spec:
       containers:
-      - name: stackfusion-mvn-container
-        image: balcha/stackfusion:latest
+      - name: stackfusion-container
+        image: balcha/stackfusion
         ports:
-        - containerPort: 8080
+        - containerPort: 80
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: stackfusion-np-service
-  labels:
-    app: stackfusion-mvn-app
+  name: stackfusion-service
 spec:
   selector:
-    app: stackfusion-mvn-app
-
+    app: stackfusion
   type: NodePort
   ports:
-  - nodePort: 31000
-    port: 8080
-    targetPort: 8080
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30000
