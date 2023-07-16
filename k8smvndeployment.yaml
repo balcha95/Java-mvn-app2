@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: stackfusion-mvn-container
-        image: balcha/stackfusion:tagname
+        image: balcha/stackfusion
         ports:
         - containerPort: 8080
 ---
