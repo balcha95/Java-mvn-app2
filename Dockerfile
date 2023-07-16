@@ -1,4 +1,5 @@
-FROM tomcat:latest
-WORKDIR /home/devopsadmin
-COPY ./mvn-hello-world.war /home/devopsadmin/tomcat/webapps
-RUN cp -r /home/devopsadmin/tomcat/webapps.dist/* /home/devopsadmin/tomcat/webapps
+FROM openjdk:11
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
+EXPOSE 8081
