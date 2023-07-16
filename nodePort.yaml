@@ -1,13 +1,13 @@
-#Service Type nodePort
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: loksai-np-service
+  name: stackfusion-np-service
   labels:
-    app: loksai-mvn-app
+    app: stackfusion-mvn-app
 spec:
   selector:
-    app: loksai-mvn-app
+    app: stackfusion-mvn-app
 
   type: NodePort
   ports:
